@@ -1,20 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Authors>Osama Al-Rashed</Authors>
     <Company>Easy Packages</Company>
+    <Version>1.0.5</Version>
+    <Description>The easy way to implement CBR (Case Based Reasoning) in C#.</Description>
+    <PackageProjectUrl>https://github.com/OsamaAlRashed/EasyCBR/tree/master/EasyCBR.IO</PackageProjectUrl>
+    <PackageTags>CBR </PackageTags>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="30.0.1" />
@@ -22,6 +19,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EasyCBR\EasyCBR.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

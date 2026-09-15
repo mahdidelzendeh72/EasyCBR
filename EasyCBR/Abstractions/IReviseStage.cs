@@ -1,14 +1,14 @@
-﻿namespace EasyCBR.Contract.IStage;
+﻿namespace EasyCBR.Abstractions;
 
 /// <summary>
 /// Represents Revise stage result.
 /// </summary>
 /// <typeparam name="TCase"></typeparam>
-public interface IReviseStage<TCase> 
+public interface IReviseStage<TCase>
     where TCase : class
 {
     /// <summary>
-    /// Reians the new case.
+    /// Retains the new case.
     /// </summary>
     /// <returns></returns>
     IRetainStage<TCase> Retain();

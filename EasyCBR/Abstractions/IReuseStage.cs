@@ -1,10 +1,11 @@
-﻿namespace EasyCBR.Contract.IStage;
+﻿namespace EasyCBR.Abstractions;
 
 /// <summary>
 /// Represents Reuse stage result.
 /// </summary>
 /// <typeparam name="TCase"></typeparam>
-public interface IReuseStage<TCase>
+/// <typeparam name="TOutput"></typeparam>
+public interface IReuseStage<TCase, TOutput>
     where TCase : class
 {
     /// <summary>
@@ -12,7 +13,7 @@ public interface IReuseStage<TCase>
     /// </summary>
     /// <param name="correctValue"></param>
     /// <returns></returns>
-    IReviseStage<TCase> Revise(object correctValue);
+    IReviseStage<TCase> Revise(TOutput correctValue);
 
     /// <summary>
     /// Confirms the value.

@@ -7,10 +7,10 @@ namespace EasyCBR.Helpers;
 
 internal static class HelperMethods
 {
-    internal static Dictionary<string, Type> GetNameAndTypeProperties<TEntiy>()
+    internal static Dictionary<string, Type> GetNameAndTypeProperties<TEntity>()
     {
         var values = new Dictionary<string, Type>();
-        var props = typeof(TEntiy).GetProperties();
+        var props = typeof(TEntity).GetProperties();
 
         foreach (PropertyInfo prop in props) 
         {
@@ -23,29 +23,15 @@ internal static class HelperMethods
     internal static object GetPropertyValue(object obj, string propName) 
         => obj.GetType().GetProperty(propName).GetValue(obj, null);
 
-    internal static (string, Type) GetPropertyHasCustomAttribute<TCase, TAttribute>()
-        where TCase : class
-        where TAttribute : Attribute
-    {
-        Type caseType = typeof(TCase);
-
-        var properties = caseType.GetProperties()
-            .Where(p => p.GetCustomAttributes(typeof(TAttribute), true).Length > 0)
-            .ToList();
-
-        if (properties.Count == 0)
-            throw new Exception("Must put Output attribute on one of properties.");
-
-        if (properties.Count > 1)
-            throw new Exception("Must put Output attribute on one of properties.");
-
-        //ToDO
-        // Check if INumber type.
-
-        return (properties[0].Name, properties[0].PropertyType);
-    }
-
     internal static Type GetTypeFromMemberInfo(this MemberInfo member)
         => (member as PropertyInfo).PropertyType;
+
+    internal static Dictionary<string, TProperty> EnumToDictionary<TProperty>()
+    {
+        var names = Enum.GetNames(typeof(TProperty)).Cast<string>();
+        var values = Enum.GetValues(typeof(TProperty)).Cast<TProperty>();
+
+        return names.Zip(values).ToDictionary(k => k.First, v => v.Second);
+    }
 
 }

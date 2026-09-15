@@ -8,7 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EasyCBR\EasyCBR.csproj" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EasyCBR.Demo\EasyCBR.Demo.csproj" />
   </ItemGroup>
 
 </Project>

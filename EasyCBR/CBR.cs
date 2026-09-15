@@ -1,18 +1,19 @@
-﻿using EasyCBR.Contract.IStage;
+﻿using EasyCBR.Abstractions;
 using EasyCBR.Enums;
 using EasyCBR.Models;
 using EasyCBR.SimilarityFunctions.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using static EasyCBR.Helpers.HelperMethods;
 
 namespace EasyCBR;
 
-public sealed class CBR<TCase> :
-    IRetriveStage<TCase>,
+public sealed class CBR<TCase, TOutput> :
+    IRetrieveStage<TCase, TOutput>,
     IRetainStage<TCase>,
-    IReuseStage<TCase>,
+    IReuseStage<TCase, TOutput>,
     IReviseStage<TCase>
     where TCase : class
 {
@@ -39,16 +40,21 @@ public sealed class CBR<TCase> :
     #region Initlize
     private CBR() { }   
 
-    public static CBR<TCase> Create(List<TCase> cases)
+    public static CBR<TCase, TOutput> Create(List<TCase> cases)
     {
-        var cbr = new CBR<TCase>();
+        ArgumentNullException.ThrowIfNull(cases);
+
+        if (cases.Count == 0)
+            throw new ArgumentOutOfRangeException(nameof(cases));
+
+        var cbr = new CBR<TCase, TOutput>();
 
         Init(cbr, cases);
 
         return cbr;
     }
 
-    public static void Init(CBR<TCase> cbr, List<TCase> cases)
+    public static void Init(CBR<TCase, TOutput> cbr, List<TCase> cases)
     {
         cbr.Properties = GetNameAndTypeProperties<TCase>();
         cbr.Cases = cases;
@@ -59,18 +65,18 @@ public sealed class CBR<TCase> :
     #endregion
 
     #region 4R
-    public IRetriveStage<TCase> Retrieve(TCase Case, int count)
+    public IRetrieveStage<TCase, TOutput> Retrieve(TCase @case, int count)
     {
         if (count <= 0 || Cases.Count < count)
             throw new ArgumentOutOfRangeException(nameof(count));
 
-        this.Case = Case;
+        this.Case = @case ?? throw new ArgumentNullException(nameof(@case));
         SelectedCases = InvokeAllSimilarityFunctions().Take(count).ToList();
 
         return this;
     }
     
-    public IReuseStage<TCase> Reuse(SelectType chooseType = SelectType.MaxSimilarity)
+    public IReuseStage<TCase, TOutput> Reuse(SelectType chooseType = SelectType.MaxSimilarity)
     {
         var resultCaseValue = SelectedCases
             .OrderByDescending(selectedCase => 
@@ -79,8 +85,8 @@ public sealed class CBR<TCase> :
                 .GetProperties()
                 .Where(x => x.Name == TargetProperty.Name && x.PropertyType == TargetProperty.Type)
                 .FirstOrDefault()
-                .GetValue(selectedCase.Case, null)
-                ).ToList();
+                .GetValue(selectedCase.Case, null))
+            .ToList();
 
         ResultCase = chooseType switch
         {
@@ -96,11 +102,10 @@ public sealed class CBR<TCase> :
         return this;
     }
 
-    public IReviseStage<TCase> Revise(object correctValue)
+    public IReviseStage<TCase> Revise(TOutput correctValue)
     {
-        ///TODO
-        if (correctValue.GetType() != TargetProperty.Type)
-            throw new ArgumentException();
+        PropertyInfo propInfo = ResultCase.Case.GetType().GetProperty(TargetProperty.Name);
+        propInfo.SetValue(ResultCase.Case, correctValue);
 
         return this;
     }
@@ -122,7 +127,7 @@ public sealed class CBR<TCase> :
             pair.Value.InvokeCore(this, pair.Key);
         }
 
-        List<double> totalScores = new List<double>();
+        List<double> totalScores = new();
 
         for (int i = 0; i < Cases.Count; i++)
         {
@@ -143,11 +148,11 @@ public sealed class CBR<TCase> :
 
     #region Run Methods
 
-    List<TCase> IRetriveStage<TCase>.Run() => SelectedCases.Select(x => x.Case).ToList();
+    List<TCase> IRetrieveStage<TCase, TOutput>.Run() => SelectedCases.Select(x => x.Case).ToList();
     
     TCase IRetainStage<TCase>.Run() => ResultCase.Case;
 
-    TCase IReuseStage<TCase>.Run() => ResultCase.Case;
+    TCase IReuseStage<TCase, TOutput>.Run() => ResultCase.Case;
 
     TCase IReviseStage<TCase>.Run() => ResultCase.Case;
 
